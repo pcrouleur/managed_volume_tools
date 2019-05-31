@@ -1,2 +1,4 @@
-*.config
 venv
+.idea
+__pycache__
+config.json
