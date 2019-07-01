@@ -33,8 +33,6 @@ def cli(user_name, add_all, create):
     elif create:
         print("User not found. Creating new user: '{}".format(user_name))
         user = create_user(user_name)
-        #print(user)
-        #user = rubrik.get('internal', '/user?username={}'.format(user_name))[0]
     else:
         print("Invalid User Name or User Name '{}' Does Not Exist On This Cluster...\n".format(user_name))
         while True:
