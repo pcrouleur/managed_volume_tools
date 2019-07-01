@@ -6,6 +6,7 @@ urllib3.disable_warnings()
 
 with open('config.json') as config_file:
     config = json.load(config_file)
+rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'])
 
 
 @click.command()
@@ -23,7 +24,6 @@ def cli(managed_volume, full, state):
 
 
 def get_managed_volume_info(managed_volume_name):
-    rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'])
     # Get managed volume id
     managed_volume_id = rubrik.object_id(managed_volume_name, 'managed_volume')
     # Get the managed volume details
