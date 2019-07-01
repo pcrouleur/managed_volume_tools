@@ -57,12 +57,12 @@ def print_managed_volume_setup(managed_volume_info):
         print('-' * 50)
         print("# Make the mount points.")
         for number, channel in enumerate(managed_volume_info['mainExport']['channels']):
-            print("mikdir -p {}/{}-ch{}".format(config['nfs_mount_path'], managed_volume_info['name'], number))
+            print("mkdir -p {}/{}-ch{}".format(config['nfs_mount_path'], managed_volume_info['name'], number))
 
         print('-' * 50)
         print("# Mount the NFS exports.")
         for number, channel in enumerate(managed_volume_info['mainExport']['channels']):
-            print("mount {}k/{}-ch{}".format(config['nfs_mount_path'], managed_volume_info['name'], number))
+            print("mount {}/{}-ch{}".format(config['nfs_mount_path'], managed_volume_info['name'], number))
         print('-' * 50)
         print("RMAN channels to use in backup scripts:")
         for number, channel in enumerate(managed_volume_info['mainExport']['channels']):
