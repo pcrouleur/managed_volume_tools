@@ -60,7 +60,7 @@ def cli(user_name, add_all, create):
                     print("There are no objects added to the {} role for the {} user.".format(role, user_name))
             elif action == 'Add' or action == 'add' or action == 'A' or action == 'a':
                 # Get the managed volume names to add to the role from input
-                managed_volumes = click.prompt("Enter comma separated list of managed volumes to add or 'all' for Global:::All", type=str).split(',')
+                managed_volumes = click.prompt("Enter comma separated list of managed volumes to add or 'all' for 'Global:::All'", type=str).split(',')
                 if managed_volumes[0] == 'q' or managed_volumes[0] == 'Q':
                     exit(0)
                 add_privileges(user, managed_volumes)
