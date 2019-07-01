@@ -11,7 +11,7 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        mvtool=mvtool:cli
-        managed_volume_user=managed_volume_user:main
+        mv_user=mv_user:cli
+        mv_info=mv_info:cli
     '''
 )
