@@ -14,7 +14,9 @@ urllib3.disable_warnings()
 
 with open('config.json') as config_file:
     config = json.load(config_file)
-rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'])
+if not config['rubrik_cdm_node_ip']:
+    config['rubrik_cdm_node_ip'] = None
+rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'], config['rubrik_cdm_token'])
 
 
 @click.command()

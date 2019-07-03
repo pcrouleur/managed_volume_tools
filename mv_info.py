@@ -7,7 +7,9 @@ urllib3.disable_warnings()
 
 with open('config.json') as config_file:
     config = json.load(config_file)
-rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'])
+if not config['rubrik_cdm_node_ip']:
+    config['rubrik_cdm_node_ip'] = None
+rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'], config['rubrik_cdm_token'])
 
 
 @click.command()
@@ -20,7 +22,10 @@ def cli(managed_volume, full, state):
         print_managed_volume_state(managed_volume_info)
     elif full:
         print_managed_volume_setup(managed_volume_info)
-        print_managed_volume_snapshot(config['mv_end_user_username'], config['mv_end_user_password'], rubrik.node_ip, managed_volume_info['id'])
+        if config['mv_end_user_username'] and config['mv_end_user_password']:
+            print_managed_volume_snapshot(config['mv_end_user_username'], config['mv_end_user_password'], rubrik.node_ip, managed_volume_info['id'])
+        else:
+            print_managed_volume_snapshot(rubrik.username, rubrik.password, rubrik.node_ip, managed_volume_info['id'])
     else:
         print_managed_volume_info(managed_volume_info)
 
@@ -88,6 +93,8 @@ def print_managed_volume_snapshot(username, password, rubrik_ip, managed_volume_
     user_pass = username + ':' + password
     b_user_pass = user_pass.encode()
     enc_user_pass = base64.b64encode(b_user_pass).decode()
+    print("# Rubrik user in snapshot command: {}".format(username))
+    print("# This is set in the config.json file (mv_end_user_username,mv_end_user_password)")
     print("# The begin snapshot ReST API command is:")
     print(
         "curl -k -X POST -H 'Authorization: Basic {}' 'https://{}/api/internal/managed_volume/{}/begin_snapshot'".format(
