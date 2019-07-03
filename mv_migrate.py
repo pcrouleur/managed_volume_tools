@@ -6,7 +6,9 @@ urllib3.disable_warnings()
 
 with open('config.json') as config_file:
     config = json.load(config_file)
-rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'])
+if not config['rubrik_cdm_node_ip']:
+    config['rubrik_cdm_node_ip'] = None
+rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'], config['rubrik_cdm_token'])
 
 
 @click.command()
@@ -17,14 +19,14 @@ def main(managed_volume_name):
     # Get the managed volume details
     managed_volume_info = rubrik.get('internal', '/managed_volume/{}'.format(managed_volume_id))
     # Rename the current managed volume
-    new_managed_volume_name = managed_volume_name + '_v4'
+    new_managed_volume_name = managed_volume_name + config['rename_postfix']
     print("Migrating managed volume '{}'. Previous backups will be available on '{}'.".format(managed_volume_name, new_managed_volume_name))
     payload = {"name": new_managed_volume_name}
     rubrik.patch('internal', '/managed_volume/{}'.format(managed_volume_id), payload)
     # Create a new v5 version of the managed volume
     payload = {
       "name": managed_volume_name,
-      "applicationTag": "Oracle",
+      "applicationTag": config['applicationTag'],
       "numChannels": managed_volume_info['numChannels'],
       "volumeSize": managed_volume_info['volumeSize'],
       "exportConfig": {
