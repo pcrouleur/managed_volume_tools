@@ -9,6 +9,7 @@
 import rubrik_cdm
 import click
 import json
+import sys
 import urllib3
 urllib3.disable_warnings()
 
@@ -31,14 +32,16 @@ def cli(user_name, add_all, create):
         print("Found user '{}' with id '{}'".format(user['username'], user['id']))
         if create:
             print("User already exists. Cannot create new user with same name.")
-            exit(1)
+            sys.exit(1)
     elif create:
-        print("User not found. Creating new user: '{}".format(user_name))
+        print("Creating new user: '{}".format(user_name))
         user = create_user(user_name)
     else:
         print("Invalid User Name or User Name '{}' Does Not Exist On This Cluster...\n".format(user_name))
         while True:
             user_name = click.prompt('Please enter a user name', type=str)
+            if user_name == 'q' or user_name == 'Q':
+                sys.exit(0)
             user = rubrik.get('internal', '/user?username={}'.format(user_name))
             if user:
                 user = user[0]
@@ -64,40 +67,48 @@ def cli(user_name, add_all, create):
                 # Get the managed volume names to add to the role from input
                 managed_volumes = click.prompt("Enter comma separated list of managed volumes to add or 'all' for 'Global:::All'", type=str).split(',')
                 if managed_volumes[0] == 'q' or managed_volumes[0] == 'Q':
-                    exit(0)
+                    sys.exit(0)
                 add_privileges(user, managed_volumes)
             elif action == 'Delete' or action == 'delete' or action == 'D' or action == 'd':
                 managed_volumes = click.prompt('Enter comma separated list of managed volumes to delete', type=str).split(',')
                 if managed_volumes[0] == 'q' or managed_volumes[0] == 'Q':
-                    exit(0)
+                    sys.exit(0)
                 delete_privileges(user, managed_volumes)
             elif action == 'q' or action == 'Q':
-                exit(0)
+                sys.exit(0)
             else:
                 print("Invalid Response ...")
 
 
 def create_user(user_name):
-    password = click.prompt('Please enter a password', type=str, confirmation_prompt=True)
-    if len(password) < 8:
-        print("Password is too short")
-        password = click.prompt('Please enter a password', type=str, confirmation_prompt=True)
+    """ Creates a Rubrik user
+    Args:
+        :user_name: the user to be created
+    Returns:
+        user:  The user information dictionary
+    """
+    password = click.prompt('Please enter a password', hide_input=True, confirmation_prompt=True)
+    while len(password) < 8:
+        print("Password is too short. Must be >8 characters")
+        password = click.prompt('Please enter a password', hide_input=True, confirmation_prompt=True)
     print("User '{}' with password '{}' will be created".format(user_name, password))
     user = rubrik.create_user(user_name, password)
-    print(user)
-    if not user['id']:
+    if user['id']:
+        print("User '{}' has been created".format(user_name))
+    else:
         print(user['errorType'])
     return user
 
 
 def list_managed_volumes(user):
-    """ Gets the mv names of a list of managed volume ids
+    """ Gets the managed volume names added to the managed_volume_role for the user along with the
+    organization id the role is added under.
 
     Args:
     user: The user parameter  dictionary as returned from a get on the user
 
     Returns:
-            A list of managed volume user privileges.
+            A list of managed volume names and the organization id
     """
     role_mvs = rubrik.get('internal', "/authorization/role/managed_volume_user?principals={}".format(user['id']))
     mvs = []
@@ -112,14 +123,11 @@ def list_managed_volumes(user):
 
 
 def add_privileges(user, managed_volumes):
-    """ Adds a list of managed volume ids to a user's
-            managed volume user role
+    """ Adds a list of managed volume ids to a user's managed volume user role
 
             Args:
             user: The user parameter  dictionary as returned from a get on the user
             managed_volumes: The list of managed volume full ids [(ManagedVolume:::cca84f33-4dd3-4cdb-9989-e1bee53be794),]
-
-            Returns: 0
     """
     if  managed_volumes == ['All'] or managed_volumes == ['all'] or managed_volumes == ['ALL'] or managed_volumes == ["Global:::All"]:
         mv_list = ["Global:::All"]
@@ -151,14 +159,11 @@ def add_privileges(user, managed_volumes):
 
 
 def delete_privileges(user, managed_volumes):
-    """ Deletes a list of managed volume ids from a user's
-            managed volume user role
+    """ Deletes a list of managed volume ids from a user's managed volume user role
 
             Args:
             user: The user parameter  dictionary as returned from a get on the user
-            managed_volumes: The list of managed volume full ids [(ManagedVolume:::cca84f33-4dd3-4cdb-9989-e1bee53be794),]
-
-            Returns: 0
+            managed_volumes: The list of managed volume full ids [(ManagedVolume:::cca84f33-4dd3-4cdb-9989-e1bee53be794),
     """
     if not managed_volumes:
         print("No managed volumes given to delete from the managed volume user role for {}.\n".format(user['username']))
