@@ -13,11 +13,11 @@ rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_use
 
 
 @click.command()
-@click.argument('managed_volume')
+@click.argument('managed_volume_name')
 @click.option('--full', '-f', is_flag=True, help='Print full mount steps')
 @click.option('--state', '-s', is_flag=True, help='Print managed volume state')
-def cli(managed_volume, full, state):
-    managed_volume_info = get_managed_volume_info(managed_volume)
+def cli(managed_volume_name, full, state):
+    managed_volume_info = get_managed_volume_info(managed_volume_name)
     if state:
         print_managed_volume_state(managed_volume_info)
     elif full:
