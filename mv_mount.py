@@ -79,9 +79,9 @@ def make_mounts(name, channels):
     if uid == 0:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode, file=sys.stderr)
+                return_code = subprocess.call("mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", -return_code, file=sys.stderr)
                     return 1
             except OSError as e:
                 print("Execution failed:", e, file=sys.stderr)
@@ -89,9 +89,9 @@ def make_mounts(name, channels):
     else:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("sudo mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode, file=sys.stderr)
+                return_code = subprocess.call("sudo mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", -return_code, file=sys.stderr)
                     return 1
             except OSError as e:
                 print("Execution failed:", e, file=sys.stderr)
@@ -128,7 +128,7 @@ def unmount_nfs(name, channels):
         for number, channel in enumerate(channels):
             try:
                 return_code = subprocess.call("umount " +
-                     "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
+                                              "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
                 if return_code != 0:
                     print("Child was terminated by signal", -return_code, file=sys.stderr)
             except OSError as e:
