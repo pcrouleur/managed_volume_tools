@@ -11,7 +11,8 @@ with open('config.json') as config_file:
     config = json.load(config_file)
 if not config['rubrik_cdm_node_ip']:
     config['rubrik_cdm_node_ip'] = None
-rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'], config['rubrik_cdm_token'])
+rubrik = rubrik_cdm.Connect(config['rubrik_cdm_node_ip'], config['rubrik_cdm_username'], config['rubrik_cdm_password'],
+                            config['rubrik_cdm_token'])
 
 
 @click.command()
@@ -49,7 +50,8 @@ def print_mounts(name, channels):
     for number, channel in enumerate(channels):
         print(
             "{}:{}  {}/{}-ch{}  nfs {} 0 0".format(
-                channel['ipAddress'], channel['mountPoint'], config['nfs_mount_path'] , name, number, config['nfs_mount_options']))
+                channel['ipAddress'], channel['mountPoint'], config['nfs_mount_path'] ,
+                name, number, config['nfs_mount_options']))
     print('')
     print("# Make the mount points.")
     for number, channel in enumerate(channels):
@@ -79,9 +81,10 @@ def make_mounts(name, channels):
     if uid == 0:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode)
+                return_code = subprocess.call("mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                            name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
                     return 1
             except OSError as e:
                 print("Execution failed:", e )
@@ -89,9 +92,10 @@ def make_mounts(name, channels):
     else:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("sudo mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode)
+                return_code = subprocess.call("sudo mkdir " + "-p {}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                                 name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
                     return 1
             except OSError as e:
                 print("Execution failed:", e)
@@ -103,21 +107,21 @@ def mount_nfs(name, channels):
     if uid == 0:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("mount -t nfs -o {} ".format(config['nfs_mount_options']) +
+                return_code = subprocess.call("mount -t nfs -o {} ".format(config['nfs_mount_options']) +
                                           "{}:{} ".format(channel['ipAddress'], channel['mountPoint']) +
                                           "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcoder)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
     else:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("sudo mount -t nfs -o {} ".format(config['nfs_mount_options']) +
+                return_code = subprocess.call("sudo mount -t nfs -o {} ".format(config['nfs_mount_options']) +
                                           "{}:{} ".format(channel['ipAddress'], channel['mountPoint']) +
                                           "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
 
@@ -127,19 +131,19 @@ def unmount_nfs(name, channels):
     if uid == 0:
         for number, channel in enumerate(channels):
             try:
-                return_code = subprocess.call("umount " +
-                     "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
+                return_code = subprocess.call("umount " + "{}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                              name, number), shell=True)
                 if return_code != 0:
-                    print("Child was terminated by signal", -return_code)
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
     else:
         for number, channel in enumerate(channels):
             try:
-                return_code = subprocess.call("sudo umount " +
-                                         "{}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
+                return_code = subprocess.call("sudo umount " + "{}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                                   name, number), shell=True)
                 if return_code != 0:
-                    print("Child was terminated by signal", -return_code)
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
 
@@ -149,23 +153,21 @@ def remove_mounts(name, channels):
     if uid == 0:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("rmdir {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode)
-                    return 1
+                return_code = subprocess.call("rmdir {}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                        name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
-                return 1
     else:
         for number, channel in enumerate(channels):
             try:
-                retcode = subprocess.call("sudo rmdir {}/{}-ch{}".format(config['nfs_mount_path'], name, number), shell=True)
-                if retcode != 0:
-                    print("Child was terminated by signal", -retcode)
-                    return 1
+                return_code = subprocess.call("sudo rmdir {}/{}-ch{}".format(config['nfs_mount_path'],
+                                                                             name, number), shell=True)
+                if return_code != 0:
+                    print("Child was terminated by signal", return_code)
             except OSError as e:
                 print("Execution failed:", e)
-                return 1
 
 
 if __name__ == "__main__":
