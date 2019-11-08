@@ -9,6 +9,7 @@ setup(
         'urllib3',
         'Click',
         'sh',
+        'pytz'
     ],
     entry_points='''
         [console_scripts]
